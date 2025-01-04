@@ -1,0 +1,56 @@
+plugins {
+    id "java"
+    id "groovy"
+    id "org.springframework.boot" version "2.5.1"
+    id "io.spring.dependency-management" version "1.0.11.RELEASE"
+    id "com.github.node-gradle.node" version "3.1.0" apply false
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group = "com.mockcompany"
+version = "1.0.0"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot dependencies
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    runtimeOnly "com.h2database:h2"
+
+    // Testing dependencies (JUnit 5 and Spock)
+    testImplementation "org.spockframework:spock-core:2.0-M5-groovy-3.0" // Use a newer Spock version
+    testImplementation "org.spockframework:spock-spring:2.0-M5-groovy-3.0" // Use a newer Spock version
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.1" // Or latest version
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.1" // Or latest version
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+}
+
+// Ensure Yarn dependencies are installed for the client-app before the build starts
+project(":client-app") {
+    apply plugin: "com.github.node-gradle.node"
+
+    // Ensure yarn installation before build
+    tasks.yarn_build.dependsOn tasks.yarn_install
+}
+
+// Task to copy the client app build output into the server's webapp directory
+task copyClientApp(type: Copy) {
+    dependsOn ":client-app:yarn_build"
+    from project(":client-app").buildDir
+    into "src/main/webapp"
+}
+
+// Ensure that the client webapp is copied before building the jar or running the app
+tasks.assemble.dependsOn copyClientApp
+tasks.bootRun.dependsOn copyClientApp
+
+// Ensure that the test task uses JUnit Platform (for JUnit 5 support)
+test {
+    useJUnitPlatform() // Enables JUnit 5 support
+}
