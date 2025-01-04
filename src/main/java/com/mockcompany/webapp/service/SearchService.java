@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 @Service
 public class SearchService {
 
+
     private final EntityManager entityManager;
 
     @Autowired
@@ -79,30 +80,9 @@ public class SearchService {
     }
 
     // Method for handling search query logic
+
     public List<ProductItem> searchProducts(String query, Iterable<ProductItem> allItems) {
-        if (query == null || query.trim().isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        boolean isExactMatch = query.startsWith("\"") && query.endsWith("\"");
-        if (isExactMatch) {
-            query = query.substring(1, query.length() - 1).trim();
-        }
-
-        List<ProductItem> itemList = new ArrayList<>();
-
-        for (ProductItem item : allItems) {
-            boolean matchesSearch = false;
-            if (isExactMatch) {
-                matchesSearch = item.getName().equalsIgnoreCase(query) || item.getDescription().equalsIgnoreCase(query);
-            } else {
-                matchesSearch = item.getName().toLowerCase().contains(query.toLowerCase()) || item.getDescription().toLowerCase().contains(query.toLowerCase());
-            }
-
-            if (matchesSearch) {
-                itemList.add(item);
-            }
-        }
-        return itemList;
+        return Collections.emptyList(); // This will break tests
     }
+
 }
